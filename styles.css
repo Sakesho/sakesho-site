@@ -1,0 +1,88 @@
+/* Sakesho — site styles (Kinfolk direction, matched to app UI kit) */
+:root{
+  --black:#0d131a; --crimson:#9B1B1B; --crimson-deep:#7A1515;
+  --cream:#F5F0EB; --cream-deep:#EDE6DD; --cream-warm:#E8DFD2;
+  --ink:#101820; --ink-mute:#5F5E5A; --ink-faint:#8A8880;
+  --hair:rgba(16,24,32,0.10); --hair-soft:rgba(16,24,32,0.06); --hair-strong:rgba(16,24,32,0.14);
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;
+  --serif:'Newsreader', Georgia, 'Iowan Old Style', serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--cream);font-family:var(--sans);color:var(--ink);
+  letter-spacing:-0.011em;-webkit-font-smoothing:antialiased;line-height:1.5;
+}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:920px;margin:0 auto;padding:0 28px}
+
+/* NAV */
+.nav{border-bottom:1px solid var(--hair);position:sticky;top:0;background:rgba(245,240,235,0.88);backdrop-filter:blur(10px);z-index:10}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.wordmark{font-family:var(--sans);font-size:17px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink)}
+.wordmark .o{color:var(--crimson)}
+.nav-links{display:flex;gap:26px;font-size:14px;font-weight:500;color:var(--ink-mute)}
+.nav-links a:hover{color:var(--crimson)}
+
+/* HERO */
+.hero{padding:96px 0 72px;border-bottom:1px solid var(--hair)}
+.overline{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--crimson);margin-bottom:18px}
+.hero h1{font-family:var(--serif);font-size:clamp(40px,7vw,64px);font-weight:400;line-height:1.02;letter-spacing:-0.02em;margin-bottom:20px;max-width:14ch}
+.hero p{font-size:18px;color:var(--ink-mute);line-height:1.55;max-width:52ch}
+.badge{display:inline-block;margin-top:30px;padding:10px 18px;border:1px solid var(--ink);border-radius:100px;font-size:13px;font-weight:600;letter-spacing:0.02em;color:var(--ink)}
+
+/* SECTION */
+section{padding:64px 0;border-bottom:1px solid var(--hair)}
+.sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:36px}
+.sec-head .num{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--crimson)}
+.sec-head h2{font-family:var(--sans);font-size:26px;font-weight:600;letter-spacing:-0.022em}
+
+/* FEATURE GRID */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:34px 44px}
+.feat h3{font-family:var(--sans);font-size:18px;font-weight:600;letter-spacing:-0.018em;margin-bottom:8px}
+.feat h3 .mk{color:var(--crimson);font-family:var(--serif);font-style:italic;font-size:16px;margin-right:8px}
+.feat p{font-size:14.5px;color:var(--ink-mute);line-height:1.6}
+
+/* SUPPORT / PROSE */
+.prose{max-width:680px}
+.prose h1{font-family:var(--serif);font-size:clamp(36px,6vw,52px);font-weight:400;line-height:1.05;letter-spacing:-0.02em;margin-bottom:18px}
+.lead{font-size:18px;color:var(--ink-mute);line-height:1.6;margin-bottom:8px}
+.prose h2{font-family:var(--sans);font-size:20px;font-weight:600;letter-spacing:-0.02em;margin:38px 0 10px}
+.prose h3{font-family:var(--sans);font-size:16px;font-weight:600;margin:26px 0 6px}
+.prose p{font-size:15.5px;color:var(--ink-mute);line-height:1.65;margin-bottom:14px}
+.prose ul{margin:0 0 14px 0;padding-left:0;list-style:none}
+.prose li{font-size:15.5px;color:var(--ink-mute);line-height:1.6;padding:6px 0 6px 22px;position:relative}
+.prose li::before{content:"—";position:absolute;left:0;color:var(--crimson)}
+.prose a{color:var(--crimson);font-weight:500;border-bottom:1px solid rgba(155,27,27,0.3)}
+.prose strong{color:var(--ink);font-weight:600}
+
+/* FAQ */
+.faq{border-top:1px solid var(--hair)}
+.faq details{border-bottom:1px solid var(--hair)}
+.faq summary{font-family:var(--sans);font-size:17px;font-weight:600;letter-spacing:-0.015em;color:var(--ink);padding:20px 36px 20px 0;cursor:pointer;list-style:none;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:6px;top:18px;font-size:22px;font-weight:400;color:var(--crimson);transition:transform .2s}
+.faq details[open] summary::after{content:"–"}
+.faq .ans{padding:0 0 22px;font-size:15.5px;color:var(--ink-mute);line-height:1.65;max-width:62ch}
+.faq .ans a{color:var(--crimson);border-bottom:1px solid rgba(155,27,27,0.3)}
+
+/* CONTACT CARD */
+.card{background:#fff;border:1px solid var(--hair-soft);border-radius:10px;padding:30px 32px;margin-top:8px}
+.card .label{font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px}
+.card .email{font-family:var(--serif);font-size:26px;color:var(--ink)}
+.card .email a{color:var(--crimson)}
+.card .note{font-size:14px;color:var(--ink-mute);margin-top:10px}
+
+/* FOOTER */
+footer{padding:56px 0 40px;text-align:center}
+.kanji{font-family:var(--sans);font-size:64px;line-height:1;color:rgba(16,24,32,0.10);user-select:none;margin-bottom:22px}
+.foot-links{display:flex;gap:24px;justify-content:center;font-size:13.5px;font-weight:500;color:var(--ink-mute);margin-bottom:14px;flex-wrap:wrap}
+.foot-links a:hover{color:var(--crimson)}
+.copy{font-size:12.5px;color:var(--ink-faint)}
+
+@media (max-width:640px){
+  .grid{grid-template-columns:1fr;gap:28px}
+  .nav-links{gap:18px}
+  .hero{padding:64px 0 52px}
+  section{padding:48px 0}
+}
