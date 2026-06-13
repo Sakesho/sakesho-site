@@ -56,10 +56,10 @@ a{color:inherit;text-decoration:none}
 
 /* APP SHOWCASE (scrollable strip) */
 .appshow{background:var(--ink);border:0;padding:56px 0 46px;overflow:hidden}
-.appshow-head{margin-bottom:26px}
+.appshow-head{margin-bottom:26px;text-align:center}
 .appshow-head h2{font-family:var(--serif);font-size:clamp(25px,3vw,33px);font-weight:400;letter-spacing:-0.015em;color:var(--cream)}
 .appshow-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 28px;scrollbar-width:thin}
-.appshow-scroll img{height:clamp(190px,20vw,280px);width:auto;max-width:none;display:block;border-radius:8px}
+.appshow-scroll img{height:clamp(190px,20vw,280px);width:auto;max-width:none;display:block;margin:0 auto;border-radius:8px}
 .appshow-hint{margin-top:16px;font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold)}
 
 /* CTA */
