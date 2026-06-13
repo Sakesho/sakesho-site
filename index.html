@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SakeYō — Your personal guide to sake</title>
 <meta name="description" content="SakeYō is the companion app for everyone who loves sake. Recommendations matched to your taste, food pairings, a tasting diary, sake events across Singapore and Japan, and more.">
+<meta property="og:title" content="SakeYō — Your personal guide to sake">
+<meta property="og:description" content="Recommendations matched to your taste, food pairings, a tasting diary, and sake events across Singapore and Japan.">
+<meta property="og:image" content="https://sakeyo.com/images/hero.jpg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sakeyo.com/">
+<link rel="icon" type="image/png" href="images/logomark-black.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
@@ -14,7 +20,10 @@
 
 <nav class="nav">
   <div class="wrap">
-    <a href="index.html" class="wordmark">SAKE<span class="o">YŌ</span></a>
+    <a href="index.html" class="brand">
+      <img class="brand-mark" src="images/logomark-black.png" alt="">
+      <span class="wordmark">SAKE<span class="o">YŌ</span></span>
+    </a>
     <div class="nav-links">
       <a href="support.html">Support</a>
       <a href="privacy.html">Privacy</a>
@@ -23,13 +32,27 @@
 </nav>
 
 <header class="hero">
-  <div class="wrap">
-    <div class="overline">The sake companion</div>
-    <h1>Your personal guide to sake.</h1>
-    <p>Tell SakeYō how you like to drink, and it learns your palate. Every recommendation is tuned to your taste — so you spend less time guessing and more time enjoying the right bottle.</p>
-    <span class="badge">Coming soon to the App Store</span>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="overline">The sake companion</div>
+      <h1>Your personal guide to sake.</h1>
+      <p>Tell SakeYō how you like to drink, and it learns your palate. Every recommendation is tuned to your taste — so you spend less time guessing and more time enjoying the right bottle.</p>
+      <span class="badge">Coming soon to the App Store</span>
+    </div>
+    <div class="hero-media">
+      <img src="images/hero.jpg" alt="A bottle of junmai sake with a tokkuri and two wooden cups on a counter">
+    </div>
   </div>
 </header>
+
+<section class="band">
+  <img class="band-bg" src="images/craft.jpg" alt="Brewers tending steamed rice inside a sake kura">
+  <div class="band-overlay"></div>
+  <div class="wrap band-inner">
+    <div class="overline light">From rice to cup</div>
+    <p class="band-quote">Centuries of craft in every bottle — made legible, one recommendation at a time.</p>
+  </div>
+</section>
 
 <section>
   <div class="wrap">
@@ -68,6 +91,35 @@
         <p>Start with the seven essentials in Sake 101, decode the label with a plain-English glossary, and read original stories on breweries and regions.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="showcase">
+  <div class="wrap">
+    <div class="show-row">
+      <div class="show-media"><img src="images/pairing.jpg" alt="Fresh oysters on ice served alongside a bottle of sake"></div>
+      <div class="show-copy">
+        <div class="overline">Food pairing</div>
+        <h3>The right pour for what's on the plate.</h3>
+        <p>Tell SakeYō what you're eating and it suggests the style that sings with it — oysters and a crisp junmai, grilled skewers and something with body — plus the reason why and the words to order it.</p>
+      </div>
+    </div>
+    <div class="show-row reverse">
+      <div class="show-media"><img src="images/flight.jpg" alt="A flight of sake with two large bottles and three wooden tasting cups"></div>
+      <div class="show-copy">
+        <div class="overline">Tasting diary &amp; cellar</div>
+        <h3>Watch your palate take shape.</h3>
+        <p>Log every bottle — brewery, temperature, vessel, notes and a rating — and SakeYō turns it into a picture of what you love. Keep your cellar in order, with drinking windows so you know what to open now.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap cta-inner">
+    <img class="cta-mark" src="images/logomark-white.png" alt="">
+    <h2>Coming soon to the App Store.</h2>
+    <p>SakeYō launches soon for iPhone and iPad. Built in Singapore for sake lovers everywhere.</p>
   </div>
 </section>
 
