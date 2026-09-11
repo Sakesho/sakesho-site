@@ -141,6 +141,30 @@ input.bad,select.bad{border-color:var(--accent)}
 .taste .foot{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:10px 0 12px; margin-top:4px; border-top:1px solid var(--hair-soft)}
 .taste .foot .hint{max-width:64ch}
 
+/* ---------- readiness ---------- */
+.ready{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:18px 0 -6px; padding:11px 14px;
+  border:1px solid var(--hair); border-radius:var(--r); background:var(--surface); font-size:13px}
+.ready .pip{width:8px; height:8px; border-radius:50%; flex:none; background:var(--hair-strong)}
+.ready b{font-weight:600}
+.ready.go{border-color:var(--sage); background:var(--sage-tint)}
+.ready.go .pip{background:var(--sage)}
+.ready.no .pip{background:#C9A94A}
+.ready .gap{color:var(--ink-mute)}
+.tally{display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--ink-mute); font-variant-numeric:tabular-nums}
+.tally b{color:var(--ink); font-weight:600}
+.track{width:52px; height:3px; background:var(--hair-soft); border-radius:2px; overflow:hidden}
+.track span{display:block; height:100%; width:0; background:var(--sage); transition:width .3s}
+@media (max-width:720px){ .tally{display:none} }
+
+/* ---------- photo ---------- */
+.photo{display:flex; align-items:flex-start; gap:12px; margin-top:2px}
+.shot{width:56px; height:84px; flex:none; border:1px solid var(--hair); border-radius:4px; background:#fff center/contain no-repeat; display:none}
+.shot.on{display:block}
+.photo .col{display:flex; flex-direction:column; gap:5px; min-width:0; flex:1}
+.photo .row{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.photo .state{font-size:12px; color:var(--ink-faint)}
+.photo .state.warn{color:var(--accent)}
+
 /* ---------- chips & temps ---------- */
 .chips{display:flex; flex-wrap:wrap; gap:6px}
 .chip{font:inherit; font-size:13px; cursor:pointer; padding:5px 12px; border-radius:999px;
@@ -211,6 +235,7 @@ dialog::backdrop{background:rgba(16,24,32,.5)}
     <span class="wordmark">SakeY&#333;</span>
     <span class="what">Sake setup</span>
     <span class="spacer"></span>
+    <span class="tally"><span class="track"><span id="track"></span></span><b id="readyCount">0</b>/<span id="totalCount">0</span> ready</span>
     <span class="saved" id="saved">&nbsp;</span>
     <button type="button" class="btn sm" id="exportBtn">Download</button>
   </div>
@@ -231,6 +256,8 @@ dialog::backdrop{background:rgba(16,24,32,.5)}
 
   <main class="main">
   <form id="form" autocomplete="off">
+
+    <div class="ready" id="ready"><span class="pip"></span><span id="readyText">Start with the bottle name.</span></div>
 
     <section>
       <div class="sec"><h2>Who is sending this</h2><span>Once, at the top. Saved with every bottle.</span></div>
@@ -281,8 +308,19 @@ dialog::backdrop{background:rgba(16,24,32,.5)}
           <input type="url" id="productUrl" data-k="productUrl" data-req placeholder="https://your-shop.com/kokuryu-junmai-ginjo-720ml">
           <span class="hint">The page for this exact size.</span></div>
         <div class="f s6"><label for="imageUrl">Bottle photo</label>
-          <input type="url" id="imageUrl" data-k="imageUrl" placeholder="https://your-shop.com/img/kokuryu.png">
-          <span class="hint">A link is fine. Bottle upright on white, 1000px or taller, no watermark.</span></div>
+          <div class="photo">
+            <span class="shot" id="shot"></span>
+            <span class="col">
+              <input type="url" id="imageUrl" data-k="imageUrl" placeholder="https://your-shop.com/img/kokuryu.png">
+              <span class="row">
+                <button type="button" class="btn ghost sm" id="photoBtn">Upload a photo</button>
+                <button type="button" class="lnk" id="photoClear" hidden>Remove</button>
+                <span class="state" id="photoState"></span>
+              </span>
+              <input type="file" id="photoFile" accept="image/*" hidden>
+            </span>
+          </div>
+          <span class="hint">A link to your own image is fine. Either way: the whole bottle cap to base, upright, plain background, 1000px or taller. We do the cut-out.</span></div>
       </div>
     </section>
 
@@ -769,8 +807,13 @@ var XLSX = (function () {
   var KEY = "sakeyo-intake-v1";
   var state = { company: { name: "", contact: "", email: "" }, bottles: [], breweries: {}, current: 0 };
 
+  function newId() {
+    return "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
   function blank() {
     return {
+      id: newId(), photo: "",
       name: "", nameJa: "", brand: "", brewery: "", prefecture: "", classification: "",
       volumeMl: null, abv: null, sku: "", janCode: "", productUrl: "", imageUrl: "",
       rprRaw: null, smv: null, acidity: null, aminoAcids: null,
@@ -793,23 +836,66 @@ var XLSX = (function () {
              website: "", toji: "", houseStyle: "" };
   }
 
+  /* Uploaded photos push a catalog well past what localStorage holds, so the
+     work lives in IndexedDB where it exists. The localStorage copy is kept in
+     step as a fallback, minus the photos. */
+  var store = (function () {
+    var NAME = "sakeyo-intake", SHELF = "state", dbp = null;
+    function open() {
+      if (dbp) return dbp;
+      dbp = new Promise(function (res, rej) {
+        if (!window.indexedDB) return rej(new Error("none"));
+        var rq = indexedDB.open(NAME, 1);
+        rq.onupgradeneeded = function () { rq.result.createObjectStore(SHELF); };
+        rq.onsuccess = function () { res(rq.result); };
+        rq.onerror = function () { rej(rq.error); };
+      }).catch(function () { return null; });
+      return dbp;
+    }
+    function tx(mode, fn) {
+      return open().then(function (db) {
+        if (!db) return null;
+        return new Promise(function (res, rej) {
+          var t = db.transaction(SHELF, mode), rq = fn(t.objectStore(SHELF));
+          t.oncomplete = function () { res(rq ? rq.result : null); };
+          t.onerror = function () { rej(t.error); };
+        });
+      }).catch(function () { return null; });
+    }
+    return {
+      get: function () {
+        return tx("readonly", function (o) { return o.get(KEY); }).then(function (v) {
+          if (v) return v;
+          try { var raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : null; }
+          catch (e) { return null; }
+        });
+      },
+      set: function (v) {
+        return tx("readwrite", function (o) { o.put(v, KEY); return null; }).then(function () {
+          try {
+            var slim = JSON.parse(JSON.stringify(v));
+            slim.bottles.forEach(function (b) { b.photo = ""; });
+            localStorage.setItem(KEY, JSON.stringify(slim));
+          } catch (e) {}
+        });
+      }
+    };
+  })();
+
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-    var s = document.getElementById("saved");
-    s.textContent = "Saved";
+    store.set(state);
+    var el = document.getElementById("saved");
+    el.textContent = "Saved";
     clearTimeout(save.t);
-    save.t = setTimeout(function () { s.textContent = " "; }, 1400);
+    save.t = setTimeout(function () { el.textContent = "\u00a0"; }, 1400);
   }
 
   function load() {
-    try {
-      var raw = localStorage.getItem(KEY);
-      if (!raw) return false;
-      var got = JSON.parse(raw);
+    return store.get().then(function (got) {
       if (!got || !got.bottles || !got.bottles.length) return false;
       state = adopt(got);
       return true;
-    } catch (e) { return false; }
+    });
   }
 
   /* Fill anything a saved or imported file is missing, so an older file
@@ -849,6 +935,8 @@ var XLSX = (function () {
         base.pairing2 = sp.foodPairings[1] || "";
         base.pairing3 = sp.foodPairings[2] || "";
       }
+      if (!base.id) base.id = newId();
+      if (b.imageData && !base.photo) base.photo = b.imageData;
       base.temps = { cold: 0, chilled: 0, room: 0, warm: 0, hot: 0 };
       var t2 = b.temps || sp.servingTemps;
       if (t2) TEMPS.forEach(function (t) { base.temps[t] = t2[t] || 0; });
@@ -904,6 +992,7 @@ var XLSX = (function () {
       el.setAttribute("data-state", String(b.temps[el.getAttribute("data-temp")] || 0));
     });
     renderKura();
+    renderPhoto();
     renderAxes();
     renderList();
     markRequired();
@@ -928,6 +1017,7 @@ var XLSX = (function () {
       var key = el.getAttribute("data-k");
       cur()[key] = readVal(el, key);
       if (key === "brewery") renderKura();
+      if (key === "imageUrl") renderPhoto();
       if (key === "prefecture") {
         var k = kuraFor(cur().brewery);
         if (k.name && !k.prefecture) k.prefecture = cur().prefecture;
@@ -954,6 +1044,68 @@ var XLSX = (function () {
       k[key] = readVal(el, key);
       if (!k.prefecture && b.prefecture) k.prefecture = b.prefecture;
       save();
+    });
+  });
+
+  /* Photos. A transparent PNG is kept as PNG — that is a cut-out already and
+     JPEG would fill the background back in. Everything else is resized down
+     and stored as JPEG so a 20-bottle catalog stays a sane size. */
+  function readPhoto(file, cb) {
+    if (!file) return cb(null, "No file.");
+    if (!/^image\//.test(file.type)) return cb(null, "That is not an image.");
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function () {
+      var max = 1400, scale = Math.min(1, max / Math.max(img.width, img.height));
+      var c = document.createElement("canvas");
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      var png = /png/i.test(file.type);
+      var data;
+      try { data = c.toDataURL(png ? "image/png" : "image/jpeg", png ? undefined : 0.82); }
+      catch (err) { return cb(null, "That image could not be read."); }
+      cb(data, null, { w: img.width, h: img.height });
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); cb(null, "That image would not open."); };
+    img.src = url;
+  }
+
+  function renderPhoto() {
+    var b = cur(), shot = document.getElementById("shot");
+    var src = b.photo || b.imageUrl;
+    shot.className = src ? "shot on" : "shot";
+    shot.style.backgroundImage = src ? 'url("' + src.replace(/"/g, '%22') + '")' : "";
+    document.getElementById("photoClear").hidden = !b.photo;
+    var st = document.getElementById("photoState");
+    if (b.photo) {
+      var kb = Math.round(b.photo.length * 0.75 / 1024);
+      st.textContent = "Photo attached, " + kb + " KB";
+      st.className = "state";
+      if (b.photoSmall) { st.textContent += " — under 1000px, so it may be too small"; st.className = "state warn"; }
+    } else {
+      st.textContent = "";
+      st.className = "state";
+    }
+  }
+
+  document.getElementById("photoBtn").addEventListener("click", function () {
+    document.getElementById("photoFile").click();
+  });
+  document.getElementById("photoClear").addEventListener("click", function () {
+    cur().photo = ""; cur().photoSmall = false;
+    renderPhoto(); save();
+  });
+  document.getElementById("photoFile").addEventListener("change", function (e) {
+    var file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    readPhoto(file, function (data, err, size) {
+      if (!data) { alert(err); return; }
+      var b = cur();
+      b.photo = data;
+      b.photoSmall = !!(size && Math.max(size.w, size.h) < 1000);
+      renderPhoto(); save();
     });
   });
 
@@ -1114,14 +1266,54 @@ var XLSX = (function () {
 
 /* ===== bottle list ======================================================= */
 
+  /* One definition of "we can set this bottle up": the fields the catalog
+     needs, plus all four flavour scores. Anything less and it lands
+     unclassified, out of recommendations and pairings. */
+  var GAP_LABEL = { name: "a name", brewery: "the brewery", prefecture: "the prefecture",
+                    classification: "the grade", volumeMl: "bottle size", abv: "alcohol",
+                    productUrl: "a product page" };
+
+  function gapsFor(b) {
+    var out = missingRequired(b).map(function (k) { return GAP_LABEL[k] || k; });
+    if (axesSet(b) < 4) out.push("the flavour profile");
+    return out;
+  }
+
+  function sentence(list) {
+    if (list.length <= 1) return list[0] || "";
+    return list.slice(0, -1).join(", ") + " and " + list[list.length - 1];
+  }
+
+  function readyCount() {
+    return filled().filter(function (b) { return gapsFor(b).length === 0; }).length;
+  }
+
+  function renderReady() {
+    var b = cur(), gaps = gapsFor(b), el = document.getElementById("ready");
+    var txt = document.getElementById("readyText");
+    if (!b.name && !b.brewery) {
+      el.className = "ready";
+      txt.textContent = "Start with the bottle name.";
+    } else if (!gaps.length) {
+      el.className = "ready go";
+      txt.innerHTML = "<b>Ready to set up.</b> We have everything we need for this bottle.";
+    } else {
+      el.className = "ready no";
+      txt.innerHTML = "<b>Nearly there.</b> <span class=\"gap\">We still need " + sentence(gaps) + ".</span>";
+    }
+    var total = filled().length, done = readyCount();
+    document.getElementById("readyCount").textContent = String(done);
+    document.getElementById("totalCount").textContent = String(total);
+    document.getElementById("track").style.width = (total ? (done / total * 100) : 0) + "%";
+  }
+
   function bottleState(b) {
-    var missing = missingRequired(b).length, n = axesSet(b);
-    if (missing === 0 && n === 4) return "ok";
-    if (missing === 0 || b.name) return "part";
-    return "";
+    if (!gapsFor(b).length) return "ok";
+    return b.name ? "part" : "";
   }
 
   function renderList() {
+    renderReady();
     var list = document.getElementById("blist");
     list.innerHTML = "";
     state.bottles.forEach(function (b, i) {
@@ -1208,7 +1400,9 @@ var XLSX = (function () {
     ["Brand / Series", function (b) { return b.brand; }],
     ["Your SKU / Product Code", function (b) { return b.sku; }],
     ["JAN / Barcode", function (b) { return b.janCode; }],
-    ["Product Image URL", function (b) { return b.imageUrl; }],
+    ["Product Image URL", function (b) {
+      return b.imageUrl || (b.photo ? "(photo attached in the JSON file)" : "");
+    }],
     ["Short Description (1 sentence)", function (b) { return b.shortDescription; }],
     ["Full Description", function (b) { return b.description; }],
     ["Rice Polishing Ratio (%)", function (b) { return b.rprRaw; }],
@@ -1324,6 +1518,7 @@ var XLSX = (function () {
           brewery: b.brewery, prefecture: b.prefecture, classification: b.classification,
           volumeMl: b.volumeMl, abv: b.abv, janCode: b.janCode,
           imageUrl: b.imageUrl,
+          imageData: b.photo || undefined,
           shortDescription: b.shortDescription, description: b.description,
           tastingNotes: b.tastingNotes,
           rprRaw: b.rprRaw, smv: b.smv, acidity: b.acidity, aminoAcids: b.aminoAcids,
@@ -1376,14 +1571,8 @@ var XLSX = (function () {
   document.getElementById("dlgClose").addEventListener("click", closeDlg);
 
   function issuesFor(b) {
-    var out = [], miss = missingRequired(b);
-    var LABEL = { name: "name", brewery: "brewery", prefecture: "prefecture",
-                  classification: "grade", volumeMl: "bottle size", abv: "alcohol",
-                  productUrl: "product page" };
-    if (miss.length) out.push("missing " + miss.map(function (k) { return LABEL[k] || k; }).join(", "));
-    var n = axesSet(b);
-    if (n < 4) out.push("flavour profile " + n + " of 4");
-    return out;
+    var gaps = gapsFor(b);
+    return gaps.length ? ["still needs " + sentence(gaps)] : [];
   }
 
   function openExport() {
@@ -1498,6 +1687,43 @@ var XLSX = (function () {
     e.target.value = "";
   });
 
+/* ===== prefill ===========================================================
+   /setup/?importer=twdc loads importers/twdc.json — what we already hold on
+   that company, so nobody retypes what is on their own website. Their own
+   saved work always wins; the prefill only fills an empty page.
+   ======================================================================== */
+
+  function prefillKey() {
+    var m = /[?&]importer=([a-z0-9-]{1,40})/i.exec(location.search);
+    return m ? m[1].toLowerCase() : null;
+  }
+
+  function prefill() {
+    var key = prefillKey();
+    if (!key || !window.fetch) return Promise.resolve(null);
+    return fetch("importers/" + key + ".json", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (got) {
+        if (!got || !got.bottles || !got.bottles.length) return null;
+        state = adopt(got);
+        state.current = 0;
+        save();
+        return got.prefill || (got.bottles.length + " bottles");
+      })
+      .catch(function () { return null; });
+  }
+
+  function notePrefill(label) {
+    var note = document.createElement("div");
+    note.className = "notice good";
+    note.style.margin = "18px 0 -6px";
+    note.innerHTML = "<span><b>We filled in what we already had.</b> " + String(label) +
+      ". Check it, then add what is missing — alcohol, bottle size and the specs. " +
+      "Nothing here is published until you send it back.</span>";
+    var ready = document.getElementById("ready");
+    ready.parentNode.insertBefore(note, ready);
+  }
+
 /* ===== start ============================================================= */
 
   function renderCompany() {
@@ -1511,9 +1737,16 @@ var XLSX = (function () {
     sel.appendChild(o);
   });
 
-  if (!load()) state.bottles = [blank()];
-  renderCompany();
-  renderBottle();
+  load().then(function (had) {
+    return had ? null : prefill();
+  }).catch(function () {
+    return null;
+  }).then(function (label) {
+    if (!state.bottles.length) state.bottles = [blank()];
+    renderCompany();
+    renderBottle();
+    if (label) notePrefill(label);
+  });
 
   window.addEventListener("beforeunload", function (e) {
     if (!filled().length) return;
