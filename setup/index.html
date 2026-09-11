@@ -433,8 +433,14 @@ dialog::backdrop{background:rgba(16,24,32,.5)}
           <span class="hint">Never shown publicly.</span></div>
         <div class="f s4"><label for="availability">Availability</label>
           <select id="availability" data-k="availability"><option>In stock</option><option>Pre-order</option><option>Seasonal</option><option>Allocation only</option><option>Discontinued</option></select></div>
-        <div class="f s6"><label for="market">Markets</label>
+        <div class="f s3"><label for="market">Markets</label>
           <input type="text" id="market" data-k="market" placeholder="Singapore"></div>
+        <div class="f s3"><label for="listed">Sell on SakeY&#333;</label>
+          <select id="listed" data-k="listed">
+            <option value="yes">Yes &mdash; list it</option>
+            <option value="no">No &mdash; hold it back</option>
+          </select>
+          <span class="hint">Turn off to keep a bottle in the catalog but out of the marketplace.</span></div>
         <div class="f s6"><label for="notes">Anything else</label>
           <input type="text" id="notes" data-k="notes" placeholder="Allocated, 60 bottles a year. Ships cold."></div>
       </div>
@@ -828,7 +834,7 @@ var XLSX = (function () {
       pairing1: "", pairing2: "", pairing3: "", pairingNotes: "", tastingNotes: "",
       shortDescription: "", description: "", awards: "",
       price: null, priceCurrency: "SGD", tradePrice: null,
-      availability: "In stock", market: "", notes: ""
+      availability: "In stock", market: "", listed: "yes", notes: ""
     };
   }
 
@@ -930,6 +936,7 @@ var XLSX = (function () {
       ["sku", "productUrl", "availability", "market", "pairingNotes", "notes"].forEach(function (k) {
         if (sp[k]) base[k] = sp[k];
       });
+      if (sp.listed === false) base.listed = "no";
       if (sp.tradePrice != null) base.tradePrice = sp.tradePrice;
       if (sp.foodPairings && sp.foodPairings.length) {
         base.pairing1 = sp.foodPairings[0] || "";
@@ -1346,6 +1353,7 @@ var XLSX = (function () {
       b.brewery = src.brewery; b.prefecture = src.prefecture; b.brand = src.brand;
       b.starter = src.starter; b.pasteurisation = src.pasteurisation; b.clarity = src.clarity;
       b.priceCurrency = src.priceCurrency; b.market = src.market; b.availability = src.availability;
+      b.listed = src.listed;
       b.volumeMl = src.volumeMl;
     }
     state.bottles.push(b);
@@ -1445,6 +1453,7 @@ var XLSX = (function () {
     ["Trade Price (optional)", function (b) { return b.tradePrice; }],
     ["Availability", function (b) { return b.availability; }],
     ["Market / Country", function (b) { return b.market; }],
+    ["Sell on SakeYo?", function (b) { return b.listed === "no" ? "No" : "Yes"; }],
     ["Notes for SakeYō", function (b) { return b.notes; }],
     ["Flavour profile", function (b) { return axisSummary(b); }],
     ["How the axes were set", function (b) { return axisSources(b); }]
@@ -1535,6 +1544,7 @@ var XLSX = (function () {
           supplier: {
             sku: b.sku, productUrl: b.productUrl, tradePrice: b.tradePrice,
             availability: b.availability, market: b.market,
+            listed: b.listed !== "no",
             foodPairings: [b.pairing1, b.pairing2, b.pairing3].filter(Boolean),
             pairingNotes: b.pairingNotes, servingTemps: b.temps, notes: b.notes
           }
@@ -1729,6 +1739,14 @@ var XLSX = (function () {
 
   function renderCompany() {
     coFields.forEach(function (el) { writeVal(el, state.company[el.getAttribute("data-co")]); });
+    /* A prefilled link already knows the company, so stop asking them to type
+       it — show it as settled and ask only for who we should reply to. */
+    var box = document.getElementById("coName");
+    if (state.company.name && prefillKey()) {
+      box.readOnly = true;
+      box.style.background = "var(--ground-2)";
+      box.title = "We already have your company on file";
+    }
   }
 
   var sel = document.getElementById("prefecture");
