@@ -1,0 +1,6 @@
+{
+  "note": "Companies offered in the setup form's dropdown. One line per company; the key is the prefill filename in this folder. Public — only ever point these at prefills built from a company's own public listings.",
+  "companies": [
+    { "key": "twdc-da5d487a", "name": "TWDC" }
+  ]
+}

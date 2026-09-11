@@ -263,8 +263,9 @@ dialog::backdrop{background:rgba(16,24,32,.5)}
     <section>
       <div class="sec"><h2>Who is sending this</h2><span>Once, at the top. Saved with every bottle.</span></div>
       <div class="grid">
-        <div class="f s4"><label for="coName">Company</label>
-          <input type="text" id="coName" data-co="name" placeholder="Your company"></div>
+        <div class="f s4"><label for="coPick">Company</label>
+          <select id="coPick"><option value="">Choose your company&hellip;</option></select>
+          <input type="text" id="coName" data-co="name" placeholder="Your company" hidden></div>
         <div class="f s4"><label for="coContact">Contact</label>
           <input type="text" id="coContact" data-co="contact" placeholder="Name"></div>
         <div class="f s4"><label for="coEmail">Email</label>
@@ -1710,7 +1711,10 @@ var XLSX = (function () {
   }
 
   function prefill() {
-    var key = prefillKey();
+    return loadPrefill(prefillKey());
+  }
+
+  function loadPrefill(key) {
     if (!key || !window.fetch) return Promise.resolve(null);
     return fetch("importers/" + key + ".json", { cache: "no-cache" })
       .then(function (r) { return r.ok ? r.json() : null; })
@@ -1737,16 +1741,80 @@ var XLSX = (function () {
 
 /* ===== start ============================================================= */
 
+  /* The dropdown is fed by importers/index.json. Adding a company is two
+     steps: drop its prefill JSON in that folder, add a line to index.json.
+     Both files are public, so a prefill must only ever hold what is already
+     public on that company's own site. */
+  var pick = document.getElementById("coPick");
+  var companies = [];
+
+  function loadCompanies() {
+    if (!window.fetch) return Promise.resolve();
+    return fetch("importers/index.json", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (got) {
+        companies = (got && got.companies) || [];
+        companies.forEach(function (c) {
+          var o = document.createElement("option");
+          o.value = c.key;
+          o.textContent = c.name;
+          pick.appendChild(o);
+        });
+        var other = document.createElement("option");
+        other.value = "__other";
+        other.textContent = "Not listed \u2014 type it in";
+        pick.appendChild(other);
+      })
+      .catch(function () {});
+  }
+
+  function showTyped(on) {
+    var box = document.getElementById("coName");
+    box.hidden = !on;
+    if (on) box.focus();
+  }
+
+  pick.addEventListener("change", function () {
+    var key = pick.value;
+    if (key === "__other") {
+      state.company.name = "";
+      document.getElementById("coName").value = "";
+      showTyped(true);
+      save();
+      return;
+    }
+    showTyped(false);
+    if (!key) return;
+    var known = companies.filter(function (c) { return c.key === key; })[0];
+    if (filled().length && !confirm(
+        "Load the bottles we hold for " + (known ? known.name : "this company") +
+        "? Anything entered here is replaced.")) {
+      syncPick();
+      return;
+    }
+    loadPrefill(key).then(function (label) {
+      if (!label) {
+        alert("We do not have a list for that company yet. Enter the bottles and send them over.");
+        state.company.name = known ? known.name : "";
+      }
+      if (!state.bottles.length) state.bottles = [blank()];
+      renderCompany();
+      renderBottle();
+      if (label) notePrefill(label);
+      save();
+    });
+  });
+
+  function syncPick() {
+    var match = companies.filter(function (c) { return c.name === state.company.name; })[0];
+    if (match) { pick.value = match.key; showTyped(false); }
+    else if (state.company.name) { pick.value = "__other"; showTyped(true); }
+    else { pick.value = ""; showTyped(false); }
+  }
+
   function renderCompany() {
     coFields.forEach(function (el) { writeVal(el, state.company[el.getAttribute("data-co")]); });
-    /* A prefilled link already knows the company, so stop asking them to type
-       it — show it as settled and ask only for who we should reply to. */
-    var box = document.getElementById("coName");
-    if (state.company.name && prefillKey()) {
-      box.readOnly = true;
-      box.style.background = "var(--ground-2)";
-      box.title = "We already have your company on file";
-    }
+    syncPick();
   }
 
   var sel = document.getElementById("prefecture");
@@ -1756,7 +1824,9 @@ var XLSX = (function () {
     sel.appendChild(o);
   });
 
-  load().then(function (had) {
+  loadCompanies().then(function () {
+    return load();
+  }).then(function (had) {
     return had ? null : prefill();
   }).catch(function () {
     return null;
