@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TWDC Sake Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&display=swap">
+<style>
+/* SakeYo's own tokens — same set the setup form and guide are built on. */
+:root{
+  --ground:#F5F0EB; --ground-2:#EDE6DD; --surface:#FCFAF7;
+  --ink:#101820; --ink-mute:#5F5E5A; --ink-faint:#8A8880;
+  --hair:rgba(16,24,32,.12); --hair-soft:rgba(16,24,32,.07);
+  --accent:#9B1B1B; --accent-tint:rgba(155,27,27,.07);
+  --sage:#2D6B4F; --sage-tint:rgba(45,107,79,.10);
+  --amber:#A8801E; --amber-tint:rgba(168,128,30,.12);
+  --r:5px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0d131a; --ground-2:#161d25; --surface:#141b23;
+    --ink:#EDE6DD; --ink-mute:#A09E96; --ink-faint:#7C7A73;
+    --hair:rgba(237,230,221,.16); --hair-soft:rgba(237,230,221,.08);
+    --accent:#DC6A62; --accent-tint:rgba(220,106,98,.14);
+    --sage:#7FB79A; --sage-tint:rgba(127,183,154,.15);
+    --amber:#D8B45A; --amber-tint:rgba(216,180,90,.16);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0d131a; --ground-2:#161d25; --surface:#141b23;
+  --ink:#EDE6DD; --ink-mute:#A09E96; --ink-faint:#7C7A73;
+  --hair:rgba(237,230,221,.16); --hair-soft:rgba(237,230,221,.08);
+  --accent:#DC6A62; --accent-tint:rgba(220,106,98,.14);
+  --sage:#7FB79A; --sage-tint:rgba(127,183,154,.15);
+  --amber:#D8B45A; --amber-tint:rgba(216,180,90,.16);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:720px; margin:0 auto; padding:34px 22px 72px}
+p{margin:0 0 13px}
+strong{font-weight:600}
+em{font-style:italic}
+
+.eyebrow{font-size:11.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 9px}
+h1{font-family:"Instrument Serif",Georgia,serif; font-weight:400; font-size:42px; line-height:1.08;
+  margin:0 0 12px; letter-spacing:-.01em; text-wrap:balance}
+.lede{font-size:17px; color:var(--ink-mute); margin:0 0 4px; max-width:60ch}
+
+h2{font-family:"Instrument Serif",Georgia,serif; font-weight:400; font-size:26px;
+  margin:42px 0 12px; text-wrap:balance}
+h3{font-size:14.5px; font-weight:600; margin:22px 0 6px}
+ul{margin:0 0 13px; padding-left:19px}
+li{margin-bottom:6px}
+li::marker{color:var(--ink-faint)}
+
+hr{border:0; border-top:1px solid var(--hair-soft); margin:34px 0}
+
+/* the standing-position panel */
+.state{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; margin:22px 0 6px;
+  background:var(--hair); border:1px solid var(--hair); border-radius:var(--r); overflow:hidden}
+.state div{background:var(--surface); padding:14px 15px}
+.state b{display:block; font-family:"Instrument Serif",Georgia,serif; font-size:30px; line-height:1;
+  font-weight:400; font-variant-numeric:tabular-nums; margin-bottom:5px}
+.state span{font-size:12.5px; color:var(--ink-mute); display:block}
+.state .ok b{color:var(--sage)}
+.state .gap b{color:var(--amber)}
+.state .bad b{color:var(--accent)}
+@media (max-width:560px){ .state{grid-template-columns:1fr} }
+
+/* route comparison — alternatives, not a sequence, so no numbering */
+.route{border:1px solid var(--hair); border-radius:var(--r); background:var(--surface);
+  padding:16px 18px; margin-bottom:11px}
+.route.pick{border-color:var(--sage); background:var(--sage-tint)}
+.route .top{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:7px}
+.route h3{margin:0; font-size:16px}
+.route .tag{font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--sage); border:1px solid var(--sage); border-radius:999px; padding:2px 8px}
+.route .who{margin-left:auto; font-size:12.5px; color:var(--ink-faint)}
+.route p{margin:0 0 8px; font-size:14px}
+.route p:last-child{margin-bottom:0}
+.route .cost{font-size:13px; color:var(--ink-mute)}
+.route .cost b{font-weight:600; color:var(--ink)}
+
+/* unit chart: one square per bottle photo */
+.units{display:flex; flex-wrap:wrap; gap:5px; margin:16px 0 10px}
+.units i{width:20px; height:30px; border-radius:2px; background:var(--amber-tint);
+  border:1px solid var(--amber); display:block}
+.units i.ok{background:var(--sage-tint); border-color:var(--sage)}
+.key{display:flex; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-mute); margin-bottom:6px}
+.key span{display:flex; align-items:center; gap:7px}
+.key s{width:11px; height:11px; border-radius:2px; text-decoration:none; display:block;
+  background:var(--amber-tint); border:1px solid var(--amber)}
+.key s.ok{background:var(--sage-tint); border-color:var(--sage)}
+
+.note{border-left:2px solid var(--accent); background:var(--accent-tint);
+  padding:12px 15px; border-radius:0 var(--r) var(--r) 0; margin:16px 0; font-size:14px}
+.note p:last-child{margin-bottom:0}
+
+table{width:100%; border-collapse:collapse; margin:12px 0 16px; font-size:14px}
+th,td{text-align:left; padding:9px 12px 9px 0; border-bottom:1px solid var(--hair-soft); vertical-align:top}
+th{font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); font-weight:600}
+td.what{font-weight:500; width:12em}
+td code{font-size:12.5px}
+
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px;
+  background:var(--ground-2); padding:1px 5px; border-radius:3px; word-break:break-all}
+a{color:var(--accent)}
+
+.hand{border:1px solid var(--hair); border-radius:var(--r); overflow:hidden; margin:16px 0}
+.hand div{display:flex; gap:13px; padding:13px 16px; background:var(--surface); align-items:baseline}
+.hand div + div{border-top:1px solid var(--hair-soft)}
+.hand .n{font-family:"Instrument Serif",Georgia,serif; font-size:19px; color:var(--accent); line-height:1;
+  min-width:16px; font-variant-numeric:tabular-nums}
+.hand b{display:block; font-weight:600; font-size:14.5px; margin-bottom:2px}
+.hand span{font-size:13px; color:var(--ink-mute)}
+
+.foot{margin-top:46px; padding-top:18px; border-top:1px solid var(--hair);
+  font-size:13px; color:var(--ink-faint)}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<p class="eyebrow">TWDC &times; SakeY&#333; &middot; 18 September 2026</p>
+<h1>Getting your range into SakeY&#333;</h1>
+<p class="lede">Most of it is already done. Here is what we have, what is missing, and two ways to finish it.</p>
+
+<div class="state">
+  <div class="ok"><b>22</b><span>of your bottles already loaded</span></div>
+  <div class="gap"><b>6</b><span>fields still needed per bottle</span></div>
+  <div class="bad"><b>20</b><span>photos we need at full size</span></div>
+</div>
+
+<h2>What we already have</h2>
+<p>Taken from your website, checked this morning. All 22 in stock, prices current.</p>
+<ul>
+  <li>Bottle name, brewery, prefecture and grade</li>
+  <li>Rice variety and polishing ratio</li>
+  <li>Retail price, SKU and product page</li>
+  <li>Your descriptions</li>
+  <li>Seven brewery profiles</li>
+</ul>
+
+<h2>What we still need</h2>
+<table>
+  <tr><th>Field</th><th>What it decides</th><th>Where to find it</th></tr>
+  <tr><td class="what">Bottle size</td><td>Separates the 720ml from the 1800ml</td><td>Back label</td></tr>
+  <tr><td class="what">ABV</td><td>Body</td><td>Back label</td></tr>
+  <tr><td class="what">Polishing ratio</td><td>Fruity or savoury</td><td>Back label &mdash; we have all but 3</td></tr>
+  <tr><td class="what">SMV</td><td>Dry or sweet, with acidity</td><td>Brewery spec sheet</td></tr>
+  <tr><td class="what">Acidity</td><td>Acidity, and dry or sweet</td><td>Brewery spec sheet</td></tr>
+  <tr><td class="what">Yeast</td><td>Shifts fruity or savoury</td><td>Brewery spec sheet</td></tr>
+</table>
+<p>These four numbers decide where a sake sits in the app. Without them a bottle stays in the catalog but never gets recommended and never gets matched to a dish.</p>
+<p>Three of the six are printed on the back label. Only SMV, acidity and yeast need the brewery.</p>
+
+<h2>Two ways to give us that</h2>
+
+<div class="route">
+  <div class="top"><h3>Spreadsheet</h3><span class="who">Several people, or forwarding to Japan</span></div>
+  <p>We send a sheet with your 22 bottles already listed. Grey columns are what we hold, so you can check we matched the right bottle. Cream columns are the gaps. Fill them in and email it back.</p>
+  <p class="cost">Leave blank anything you do not have. Nothing gets estimated.</p>
+</div>
+
+<div class="route">
+  <div class="top"><h3>Online form</h3><span class="who">One person working through the list</span></div>
+  <p>A link that opens with your 22 bottles already in it. It checks as you go, tells you which bottles are complete, takes photos, and sets the taste scales. Download the file at the end and email it over.</p>
+  <p class="cost">It saves to one browser on one computer, so it suits one person rather than a team.</p>
+</div>
+
+<div class="route pick">
+  <div class="top"><h3>Simplest option</h3><span class="tag">Least work for you</span></div>
+  <p>Send us whatever spec sheets you already hold from the seven breweries. PDFs, product sheets, a photo of the back label. We read the numbers out and enter them ourselves.</p>
+</div>
+
+<h2>If a brewery has no SMV or acidity</h2>
+<p>Some kura do not publish them. In that case someone who has drunk the sake can set the four taste scales by hand.</p>
+<p>The form has a single screen with all 22 bottles on it, four scales each, and takes about 20 minutes. Scores we have already calculated are marked and left alone, so most bottles need three, not four.</p>
+
+<h2>Bottle photos</h2>
+<div class="key">
+  <span><s class="ok"></s> Usable at full size &mdash; 2</span>
+  <span><s></s> Web thumbnails &mdash; 20</span>
+</div>
+<div class="units">
+  <i class="ok"></i><i class="ok"></i>
+  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+</div>
+<p>The photos on your site are the right kind &mdash; bottle upright on clean white. They are just too small: 20 of the 22 are between 157 and 338 pixels wide, and we need at least 500 &times; 800.</p>
+<ul>
+  <li>The originals these were made from, 1000 pixels tall or more</li>
+  <li>A Drive or Dropbox folder is fine, named by SKU if possible</li>
+  <li>Whole bottle, cap to base</li>
+  <li>No need to cut them out or remove backgrounds &mdash; we do that</li>
+</ul>
+
+<h2>Links</h2>
+<div class="hand">
+  <div><span class="n">1</span><span><b>The online form</b><span><a href="../?importer=twdc-da5d487a">sakeyo.com/setup/?importer=twdc-da5d487a</a> &mdash; opens with your 22 bottles in it</span></span></div>
+  <div><span class="n">2</span><span><b>How to fill it in</b><span><a href="../guide/">sakeyo.com/setup/guide/</a> &mdash; field by field, plus what each term on a Japanese back label means</span></span></div>
+</div>
+
+<h2>How this works</h2>
+<ul>
+  <li>Nothing goes live automatically. The file comes to us, we check it, then it publishes.</li>
+  <li>Every bottle has a sell or hold switch, so allocation stock can sit in the catalog without being orderable.</li>
+  <li>Trade price is never shown publicly.</li>
+  <li>Partial is fine. We load what is ready and come back for the rest.</li>
+  <li>Your descriptions stay yours. We may shorten for space, we will not rewrite them.</li>
+</ul>
+
+<p class="foot">SakeY&#333; &mdash; 18 September 2026</p>
+
+</div>
+</body>
+</html>
