@@ -165,6 +165,35 @@ input.bad,select.bad{border-color:var(--accent)}
 .photo .state{font-size:12px; color:var(--ink-faint)}
 .photo .state.warn{color:var(--accent)}
 
+/* ---------- taste grid ---------- */
+.gridview{display:none; padding:22px 0 60px}
+.gridview.on{display:block}
+body.grid .main > form{display:none}
+.gh{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px}
+.gh h2{font-family:"Instrument Serif",Georgia,serif; font-weight:400; font-size:24px; margin:0}
+.gh .done{margin-left:auto; font-size:13px; color:var(--ink-faint); font-variant-numeric:tabular-nums}
+.gh .done b{color:var(--sage)}
+.gridview > p{font-size:13px; color:var(--ink-mute); max-width:76ch; margin:0 0 16px}
+.gwrap{overflow-x:auto; border:1px solid var(--hair); border-radius:var(--r); background:var(--surface)}
+table.tg{border-collapse:collapse; width:100%; min-width:720px}
+table.tg th,table.tg td{padding:7px 10px; border-bottom:1px solid var(--hair-soft); text-align:left; vertical-align:middle}
+table.tg thead th{position:sticky; top:56px; background:var(--ground-2); z-index:5;
+  font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-mute); font-weight:600}
+table.tg thead th i{display:block; font-style:normal; font-size:10.5px; letter-spacing:0;
+  text-transform:none; color:var(--ink-faint); font-weight:400}
+table.tg tbody tr:hover{background:var(--ground-2)}
+table.tg td.nm{font-size:13px; max-width:270px}
+table.tg td.nm b{display:block; font-weight:500}
+table.tg td.nm span{font-size:11.5px; color:var(--ink-faint)}
+table.tg td.st{font-size:12px; color:var(--ink-faint); white-space:nowrap; font-variant-numeric:tabular-nums}
+table.tg td.st.ok{color:var(--sage)}
+.mini{display:flex; gap:3px}
+.mini button{width:25px; height:25px; padding:0; font:inherit; font-size:11.5px; cursor:pointer;
+  color:var(--ink-mute); border:1px solid var(--hair-strong); background:var(--field); border-radius:3px}
+.mini button:hover{border-color:var(--ink-faint); color:var(--ink)}
+.mini button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--ground)}
+.mini button.calc{background:var(--sage-tint); border-color:var(--sage); color:var(--ink)}
+
 /* ---------- chips & temps ---------- */
 .chips{display:flex; flex-wrap:wrap; gap:6px}
 .chip{font:inherit; font-size:13px; cursor:pointer; padding:5px 12px; border-radius:999px;
@@ -235,6 +264,7 @@ dialog::backdrop{background:rgba(16,24,32,.5)}
     <span class="wordmark">SakeY&#333;</span>
     <span class="what">Sake setup</span>
     <span class="spacer"></span>
+    <button type="button" class="btn ghost sm" id="gridBtn">Flavour profiles</button>
     <a class="lnk" href="guide/" style="margin-right:4px">How to fill this in</a>
     <span class="tally"><span class="track"><span id="track"></span></span><b id="readyCount">0</b>/<span id="totalCount">0</span> ready</span>
     <span class="saved" id="saved">&nbsp;</span>
@@ -467,6 +497,27 @@ dialog::backdrop{background:rgba(16,24,32,.5)}
   </form>
   </main>
 </div>
+
+  <section class="gridview" id="gridview">
+    <div class="gh">
+      <h2>Flavour profiles</h2>
+      <span class="done" id="gridDone"></span>
+    </div>
+    <p id="gridNote"></p>
+    <div class="gwrap">
+      <table class="tg">
+        <thead><tr>
+          <th>Bottle</th>
+          <th>Dry / sweet <i>1 sweet &rarr; 5 dry</i></th>
+          <th>Acidity <i>1 low &rarr; 5 high</i></th>
+          <th>Body <i>1 light &rarr; 5 full</i></th>
+          <th>Fruity / savoury <i>1 fruity &rarr; 5 savoury</i></th>
+          <th></th>
+        </tr></thead>
+        <tbody id="gridBody"></tbody>
+      </table>
+    </div>
+  </section>
 
 <dialog id="dlg">
   <div class="dh"><h2 id="dlgTitle">Download</h2><p id="dlgSub"></p></div>
@@ -1272,6 +1323,143 @@ var XLSX = (function () {
       ? "Where a spec exists and you set a different score, we keep your score."
       : (lackSpecs.length ? "" : "The yeast can shift fruity / savoury by one step; we apply that on our side.");
   }
+
+/* ===== flavour profiles, all bottles at once ==============================
+   Setting four scales on twenty bottles through the single-bottle form is a
+   lot of scrolling. This is the same data in one grid: one row a bottle, the
+   four scales, nothing else. Sage means the specs already worked it out.
+   ======================================================================== */
+
+  var gridOn = false;
+
+  function openGrid() {
+    gridOn = true;
+    document.body.classList.add("grid");
+    document.getElementById("gridview").classList.add("on");
+    document.getElementById("gridBtn").textContent = "Back to the bottles";
+    renderGrid();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function closeGrid() {
+    gridOn = false;
+    document.body.classList.remove("grid");
+    document.getElementById("gridview").classList.remove("on");
+    document.getElementById("gridBtn").textContent = "Flavour profiles";
+    renderBottle();
+  }
+
+  document.getElementById("gridBtn").addEventListener("click", function () {
+    if (gridOn) closeGrid(); else openGrid();
+  });
+
+  function renderGrid() {
+    var body = document.getElementById("gridBody");
+    var list = filled();
+    body.innerHTML = "";
+
+    if (!list.length) {
+      var empty = document.createElement("tr");
+      var cell = document.createElement("td");
+      cell.colSpan = 6;
+      cell.style.padding = "22px";
+      cell.style.color = "var(--ink-faint)";
+      cell.textContent = "Add a bottle first.";
+      empty.appendChild(cell);
+      body.appendChild(empty);
+      return;
+    }
+
+    list.forEach(function (b) {
+      var resolved = resolveAxes(b), tr = document.createElement("tr");
+
+      var nm = document.createElement("td");
+      nm.className = "nm";
+      var strong = document.createElement("b");
+      strong.textContent = b.name || "Untitled bottle";
+      nm.appendChild(strong);
+      var sub = document.createElement("span");
+      sub.textContent = [b.brewery, b.classification].filter(Boolean).join(" \u00b7 ");
+      nm.appendChild(sub);
+      tr.appendChild(nm);
+
+      AXES.forEach(function (a) {
+        var td = document.createElement("td");
+        var box = document.createElement("span");
+        box.className = "mini";
+        box.setAttribute("role", "group");
+        box.setAttribute("aria-label", b.name + " \u2014 " + a.label);
+        for (var i = 1; i <= 5; i++) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = String(i);
+          btn.setAttribute("data-id", b.id);
+          btn.setAttribute("data-axis", a.key);
+          btn.setAttribute("data-score", String(i));
+          box.appendChild(btn);
+        }
+        td.appendChild(box);
+        tr.appendChild(td);
+      });
+
+      var st = document.createElement("td");
+      st.className = "st";
+      tr.appendChild(st);
+
+      tr.bottleId = b.id;
+      paintRow(tr, b);
+      body.appendChild(tr);
+    });
+
+    gridTally();
+  }
+
+  /* Repaint one row, so a click does not rebuild the table under the cursor. */
+  function paintRow(tr, b) {
+    var resolved = resolveAxes(b);
+    AXES.forEach(function (a) {
+      var val = resolved[a.key].value, src = resolved[a.key].source;
+      [].slice.call(tr.querySelectorAll('[data-axis="' + a.key + '"]')).forEach(function (btn) {
+        var i = parseInt(btn.getAttribute("data-score"), 10);
+        btn.className = (val === i && src === "COMPUTED") ? "calc" : "";
+        if (val === i && src !== "COMPUTED") btn.setAttribute("aria-pressed", "true");
+        else btn.removeAttribute("aria-pressed");
+      });
+    });
+    var n = axesSet(b), st = tr.querySelector(".st");
+    st.className = "st" + (n === 4 ? " ok" : "");
+    st.textContent = n + " of 4";
+  }
+
+  function gridTally() {
+    var list = filled();
+    var ready = list.filter(function (b) { return axesSet(b) === 4; }).length;
+    document.getElementById("gridDone").innerHTML =
+      "<b>" + ready + "</b> of " + list.length + " complete";
+    document.getElementById("gridNote").textContent = ready === list.length && list.length
+      ? "Every bottle has all four. Nothing to do here."
+      : "Sage means the specs already worked that score out — leave those alone. Set the rest as the sake tastes to you: "
+        + "1 is sweet, low, light, fruity; 5 is dry, high, full, savoury. A bottle needs all four before it can be recommended to anyone.";
+  }
+
+  document.getElementById("gridBody").addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-axis]");
+    if (!btn) return;
+    var id = btn.getAttribute("data-id");
+    var b = state.bottles.filter(function (x) { return x.id === id; })[0];
+    if (!b) return;
+    var key = btn.getAttribute("data-axis"), score = parseInt(btn.getAttribute("data-score"), 10);
+    b.axisMode = "taste";
+    /* Entering taste mode means all four are the person's call, so seed the
+       ones the specs had already produced rather than blanking them. */
+    var auto = computedAxes(b);
+    AXES.forEach(function (a) { if (b.axes[a.key] == null) b.axes[a.key] = auto[a.key]; });
+    b.axes[key] = b.axes[key] === score ? null : score;
+    paintRow(btn.closest("tr"), b);
+    gridTally();
+    renderList();
+    save();
+  });
 
 /* ===== bottle list ======================================================= */
 
