@@ -11,10 +11,9 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sakeyo.com/">
 <link rel="icon" type="image/png" href="images/logomark-black.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=2">
+<meta name="apple-itunes-app" content="app-id=6757003623">
+<link rel="preload" href="fonts/Switzer-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 
@@ -37,7 +36,11 @@
       <div class="overline">The sake app for the rest of us</div>
       <h1>Good sake, without the guesswork.</h1>
       <p>There are thousands of sake out there, and most of us can't read the labels. SakeYō learns what you like, tells you what to eat with it, and shows you where to find the good stuff in Japan and Singapore — no special vocabulary required.</p>
-      <span class="badge">Coming soon to the App Store</span>
+      <div class="stores">
+        <a href="https://apps.apple.com/sg/app/id6757003623"><img class="store-badge" src="images/badge-app-store.svg" alt="Download on the App Store"></a>
+        <a href="https://play.google.com/store/apps/details?id=com.sakeyo.app"><img class="store-badge" src="images/badge-google-play.png" alt="Get it on Google Play"></a>
+      </div>
+      <p class="stores-note">Available in Singapore.</p>
     </div>
     <div class="hero-media">
       <img src="images/hero-bottle.jpg" alt="A bottle of Bijofu junmai daiginjo with a blue cut-glass cup on a counter">
@@ -96,37 +99,54 @@
     </div>
   </div>
   <div class="appshow-scroll">
-    <img src="images/app-strip.jpg" alt="SakeYō app screens: recommendations, a tasting diary, label scanning, an events calendar, Sake 101, and food pairings">
+    <img src="images/app-panorama-3600.jpg"
+         srcset="images/app-panorama-1900.jpg 1900w, images/app-panorama-3600.jpg 3600w"
+         sizes="(max-width: 1094px) 1038px, (max-width: 1800px) calc(100vw - 56px), 1744px"
+         width="3600" height="867"
+         alt="Nine SakeYō app screens: a scanned bottle with its match score, a taste profile, a sake diary, the Explore section, a Tokyo sake bar, the events calendar, an event page with a Reserve button, a featured sake expert, and the people you follow">
   </div>
+  <div class="wrap"><p class="appshow-hint">Swipe to see all nine screens</p></div>
 </section>
 
 <section>
   <div class="wrap">
-    <div class="sec-head"><span class="num">&amp;</span><h2>Everything else it does</h2></div>
+    <div class="sec-head"><span class="num">&amp;</span><h2>What SakeYō does</h2></div>
     <div class="grid">
       <div class="feat">
-        <h3><span class="mk">i</span>Learns your taste</h3>
-        <p>Answer a few questions about how you like to drink and SakeYō builds a picture of your palate. Then every bottle gets a score for how well it fits you — like a friend who's tried everything and remembers what you ordered last time.</p>
+        <h3><span class="mk">i</span>Know if you&rsquo;ll like it before you buy it</h3>
+        <p>Point your camera at a label, including one written entirely in Japanese, and SakeYō tells you what the bottle is and gives it a score for how well it matches your taste.</p>
       </div>
       <div class="feat">
-        <h3><span class="mk">ii</span>Keeps a diary</h3>
-        <p>Write down what you drank and what you thought — temperature, the cup, who you were with. Over time it adds up to a surprisingly good map of your taste.</p>
+        <h3><span class="mk">ii</span>Your palate, mapped</h3>
+        <p>SakeYō works out which styles you lean towards, such as rich, aged, dry or light, from a short quiz and the bottles you rate. You can adjust the scores yourself, and tap any style to see tasting notes and how to order it.</p>
       </div>
       <div class="feat">
-        <h3><span class="mk">iii</span>Runs your cellar</h3>
-        <p>Track the bottles you own and when to open them, so nothing good dies in the back of the fridge.</p>
+        <h3><span class="mk">iii</span>Never forget a bottle again</h3>
+        <p>The diary keeps a record of every sake you drink, with your rating and notes, the temperature, the cup, and who you were with. It also counts how many sake and breweries you&rsquo;ve tried.</p>
       </div>
       <div class="feat">
-        <h3><span class="mk">iv</span>Reads the label</h3>
-        <p>Point your camera at a bottle and SakeYō tells you what it is — handy when the whole label is in kanji.</p>
+        <h3><span class="mk">iv</span>Find the good stuff nearby</h3>
+        <p>The Local section lists the bars, restaurants and shops in Singapore that we go back to for good sake.</p>
       </div>
       <div class="feat">
-        <h3><span class="mk">v</span>Knows what's on</h3>
-        <p>A calendar of tastings, dinners, workshops and brewery visits across Singapore and Japan. Filter it, save the ones you want, show up.</p>
+        <h3><span class="mk">v</span>Drink your way through Japan</h3>
+        <p>The Japan section covers the sake bars, breweries, shops and restaurants we recommend across the country, with articles on places such as Sake Bar Otonari in Tokyo.</p>
       </div>
       <div class="feat">
-        <h3><span class="mk">vi</span>Teaches the basics</h3>
-        <p>Seven things worth knowing in Sake 101, a plain-English glossary for the label, and stories about the people who make it.</p>
+        <h3><span class="mk">vi</span>Never miss a tasting</h3>
+        <p>The events calendar lists sake tastings, dinners, workshops and festivals in Singapore. You can filter by type and save the ones you want to go to.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="mk">vii</span>A seat in two taps</h3>
+        <p>Each event page shows the date, venue, price and who else is going. You can tap Going to let people know, or Reserve to book through the organiser.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="mk">viii</span>Follow people who actually know</h3>
+        <p>Follow sommeliers, brewers and bar owners and see the bottles they are drinking and recommending right now.</p>
+      </div>
+      <div class="feat">
+        <h3><span class="mk">ix</span>Find your people</h3>
+        <p>Search for friends by username and follow them. They approve your request before you&rsquo;re connected, and you can talk sake with everyone in the community feed and forums.</p>
       </div>
     </div>
   </div>
@@ -135,8 +155,12 @@
 <section class="cta">
   <div class="wrap cta-inner">
     <img class="cta-mark" src="images/logomark-white.png" alt="">
-    <h2>Coming soon to the App Store.</h2>
+    <h2>Available now in Singapore.</h2>
     <p>Built in Singapore by people who drink a lot of sake, so you don't have to guess.</p>
+    <div class="stores">
+      <a href="https://apps.apple.com/sg/app/id6757003623"><img class="store-badge" src="images/badge-app-store.svg" alt="Download on the App Store"></a>
+      <a href="https://play.google.com/store/apps/details?id=com.sakeyo.app"><img class="store-badge" src="images/badge-google-play.png" alt="Get it on Google Play"></a>
+    </div>
   </div>
 </section>
 
