@@ -13,7 +13,7 @@
 <link rel="icon" type="image/png" href="images/logomark-black.png">
 <meta name="apple-itunes-app" content="app-id=6757003623">
 <link rel="preload" href="fonts/Switzer-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 
@@ -31,19 +31,24 @@
 </nav>
 
 <header class="hero">
+  <div class="wrap wide hero-film">
+    <div class="film">
+      <video id="film" src="video/sakeyo-film.mp4" poster="images/film-poster.jpg" preload="none" playsinline controls aria-label="SakeYō: a 98-second film of the app, narrated"></video>
+      <button class="film-play" id="film-play" type="button" aria-label="Play the film with sound">
+        <span class="film-play-icon" aria-hidden="true"></span><span>Watch the film</span><span class="film-len">1:38</span>
+      </button>
+    </div>
+  </div>
   <div class="wrap hero-grid">
     <div class="hero-copy">
       <div class="overline">Sake in Singapore and Japan</div>
-      <h1>Find good sake, and the people who know it.</h1>
+      <h1>Find good sake, and know if you’ll like it before you buy.</h1>
       <p>SakeYō helps you choose with confidence, whether it's a bottle to try tonight, a restaurant down the road, or a shop in Kyoto worth the trip. Follow local sommeliers to see what they're drinking, find tastings and events near you, and keep track of every sake you drink. The more you rate, the better your recommendations get.</p>
       <div class="stores">
         <a href="https://apps.apple.com/sg/app/id6757003623"><img class="store-badge" src="images/badge-app-store.svg" alt="Download on the App Store"></a>
         <a href="https://play.google.com/store/apps/details?id=com.sakeyo.app"><img class="store-badge" src="images/badge-google-play.png" alt="Get it on Google Play"></a>
       </div>
       <p class="stores-note">Available in Singapore.</p>
-    </div>
-    <div class="hero-media">
-      <img src="images/hero-bottle.jpg" alt="A bottle of Bijofu junmai daiginjo with a blue cut-glass cup on a counter">
     </div>
   </div>
 </header>
@@ -176,5 +181,11 @@
   </div>
 </footer>
 
+<script>
+(function(){var v=document.getElementById('film'),b=document.getElementById('film-play');if(!v||!b)return;
+v.controls=false;
+b.addEventListener('click',function(){v.controls=true;b.hidden=true;var p=v.play();if(p&&p.catch)p.catch(function(){});});
+v.addEventListener('play',function(){b.hidden=true;v.controls=true;});})();
+</script>
 </body>
 </html>
